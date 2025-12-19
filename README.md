@@ -1,119 +1,138 @@
-# Simulador de selector de aliens basado en el omnitrix de la serie "Ben 10"
-Como dice el título, este proyecto se basa en el misterioso comportamiento interno que tiene el Omnitrix en la serie Ben 10,
-donde para usarse se sigue el siguiente comportamiento:
+# Alien Selector Simulator based on the Omnitrix from the series "Ben 10"
 
->Ejemplo 1: Selección guiada 
-> 
->Paso 1: Introducir el criterio de selección, puede ser fuerza, velocidad, resistencia, una combinación de estos o el total,
->en caso de no ser válido se usará velocidad o resistencia por defecto (según sea modo de un criterio o dos).
->Paso 2: Ver los aliens que van saliendo hasta que se desee.
+As the title suggests, this project is based on the mysterious internal behavior of the Omnitrix in the Ben 10 series,  
+where its usage follows the behavior described below:
+
+> Example 1: Guided Selection  
+>  
+> Step 1: Enter the selection criteria, which can be strength, speed, endurance, a combination of these, or the total.  
+> If the criteria is not valid, speed or endurance will be used by default (depending on whether one or two criteria are selected).  
+> Step 2: View the aliens as they appear until the desired one is reached.
 >
->Ejemplo 2: Selección libre 
+> Example 2: Free Selection  
 >
->Paso 1: Insertar el nombre del alien que quieres elegir (tienes intentos limitados que se reinician cuando eliges un alien no repetido y válido)
->Paso 2: Continuar eligiendo aliens (no puedes elegir el mismo dos veces seguidas) hasta que se desee o se agote el número de intentos.
+> Step 1: Enter the name of the alien you want to select (you have a limited number of attempts that reset when a valid, non-repeated alien is chosen).  
+> Step 2: Continue selecting aliens (you cannot select the same alien twice in a row) until desired or until attempts run out.
 >            
 
-Adicionalmente incluyo funciones para registrar nuevos aliens, eliminarlos, ver un alien en base al nombre y sus estadísticas, ver la lista de aliens completa o ver la lista con atributos incluso. 
-El orden de los aliens en las "listas" es en el que se hayan añadido, nunca modifico dicho vector para que así se sepa siempre en qué orden se añadieron.
+Additionally, I include functions to register new aliens, delete them, view an alien by name along with its statistics, view the complete alien list, or view the list including attributes.  
+The order of the aliens in the “lists” corresponds to the order in which they were added; this vector is never modified so the insertion order is always preserved.
 
-# Correcciones
->En esta entrega no pude cambiar muchas cosas, lo único que hice fue implementar el Hash para las búsquedas por nombre que no modifican ningún atributo del alien, lo cuál acelera el programa (La complejidad de busqueda por nombre pasó de O(n) al trabajar con vector a O(1) como mejor caso, aunque promedio y peor sigue en O(n)).
->He de mencionar que para ello tuve que modificar el .h de Omnitrix, de Main y de Menu principalmente, traté de volver a provocar el error obtenido durante la demostración pero me fue imposible.
+# Corrections
 
-## SICT0302B: Toma decisiones 
+> In this submission, I was unable to change many things. The only modification I made was implementing a Hash for name-based searches that do not modify any alien attributes, which speeds up the program (the time complexity of name-based search went from O(n) when using a vector to O(1) in the best case, although average and worst cases remain O(n)).  
+> I should mention that to achieve this, I had to modify the Omnitrix.h, Main, and Menu files mainly. I tried to reproduce the error encountered during the demonstration, but it was impossible to do so.
 
-### Selecciona y usa una estructura lineal adecuada al problema
+## SICT0302B: Decision Making
 
-Uso un queue en la parte del modo de selección guiada ya que están ordenados para sacar los aliens en un orden descendente y no repetirlos; para almacenar los aliens uso un simple vector.
-Cada alien es un objeto que contiene como atributos de tipo entero: inteligencia, fuerza, velocidad, resistencia, total, batallas ganadas, veces usado y veces elegido;
-y el nombre que es un atributo de tipo cadena. Los cinco primeros atributos se usan para poder ordenar a los aliens según el criterio deseado en el modo de selección
-guiada; a su vez: total, batallas ganadas y veces elegido se usan para determinar el orden en el splay tree.
+### Selects and uses an appropriate linear data structure for the problem
 
+I use a queue in the guided selection mode since aliens are ordered to be retrieved in descending order without repetition; for storing aliens, I use a simple vector.  
+Each alien is an object containing the following integer attributes: intelligence, strength, speed, endurance, total, battles won, times used, and times selected;  
+and a name attribute of type string.  
 
-### Selecciona un algoritmo de ordenamiento adecuado al problema
+The first five attributes are used to sort aliens according to the desired criteria in guided selection mode; additionally, total, battles won, and times selected are used to determine the order in the splay tree.
 
-Para este problema utilice dos algoritmos de ordenamiento distintos, uno de tipo InsertionSort y otro de tipo MergeSort, específicamente si hay 20 aliens o menos se usará el 
-Insertion Sort y si hay más (en la serie original la versión del futuro de Ben 10 llegó a tener más de 10,000 aliens) se usará el MergeSort. La razón de esto es que, cuando hay
-un número pequeño de elementos, InsertionSort puede ser igual o incluso más eficiente que MergeSort en algunos casos, y elegí MergeSort porque de los que vimos en clase es el más 
-eficiente ya que su complejidad temporal no depende de cómo estén ordenados los elementos (lo cual es bueno para el peor caso pero afecta un poco al mejor).
-InsertionSort (línea 26) y mergeSort (línea 151) están en el archivo ordenamiento.h, he de mencionar también que mergeSort requiere de otras funciones para funcionar como mergeArray 
-(línea 73) y mergeSplit (línea 125).
+---
 
-### Usa un árbol adecuado para resolver un problema
+### Selects an appropriate sorting algorithm for the problem
 
-Usé un Splay Tree para poder acceder rapidamente a los aliens usados recientemente y que estén acomodados en base a 3 criterios (veces seleccionado,
-batallas ganadas y por último total), la lógica es que si dos aliens tienen el mismo número de veces seleccionado se usará batallas ganadas y si este
-otro atributo también es igual se usará total (atributo que es la suma de otros 4, lo cual dificulta que se repita). 
+For this problem, I used two different sorting algorithms: Insertion Sort and Merge Sort.  
+Specifically, if there are 20 or fewer aliens, Insertion Sort is used; if there are more (in the original series, the future version of Ben 10 had more than 10,000 aliens), Merge Sort is used.  
 
-Las funciones donde lo uso es en seleccionLibre de menu.h en la linea 437 (utiliza registrarEleccionSplay en la línea 32 de omnitrix.h que a su vez ocupa find de la clase SplayTree
-y find de la clase Node, líneas 591 y 112 respecitvamente de arbol.h ), registrarAlien en la línea 187 de menu.h (utiliza anadirAlien de omnitrix.h línea 86 y anadirSplay en línea 26, 
-esta última utiliza add de las clases Node y SplayTree, ambas declaradas en arbol.h línea 67 y 542 respectivamente ).
-Finalmente eliminarADN de menu.h línea 295 (utiliza eliminarAlienSplay declarada en la línea 29 de omnitrix.h que a su vez usa remove de las clases Node y SplayTree, y se declaran
-en arbol.h líneas 189 y 554 respectivamente). 
+The reason is that when the number of elements is small, Insertion Sort can be just as efficient or even more efficient than Merge Sort in some cases. I chose Merge Sort because, among those studied in class, it is the most efficient, as its time complexity does not depend on the initial ordering of the elements (which is beneficial for the worst case, though it slightly affects the best case).  
 
-## SICT0301B: Evalúa los componentes
+InsertionSort (line 26) and MergeSort (line 151) are located in the file `ordenamiento.h`. It is also worth mentioning that MergeSort requires additional functions to work, such as `mergeArray` (line 73) and `mergeSplit` (line 125).
 
-### Presenta Casos de Prueba correctos y completos para todas las funciones y procedimientos del programa,
+---
 
-Los casos de prueba que yo segiero son los siguientes:
+### Uses an appropriate tree to solve a problem
 
-Añadir y eliminar aliens y posteriormente mostrar la lista de aliens para ver si están todos los añadidos y si están en el orden que se fueron insertando, posteriormente apagar y encender para probar el guardado.
+I used a Splay Tree to quickly access recently used aliens and to organize them based on three criteria (times selected, battles won, and finally total).  
+The logic is that if two aliens have the same number of selections, battles won is used; if that attribute is also equal, total is used (an attribute that is the sum of four others, making ties unlikely).
 
-Probar los distintos ordenamientos haciendo ordenamiento con los 20 por defecto y luego con otro alien añadido por el usuario, para probar tanto insertionSort como mergeSort.
+The functions where it is used include `seleccionLibre` in `menu.h` at line 437 (which uses `registrarEleccionSplay` at line 32 of `omnitrix.h`, which in turn uses `find` from the `SplayTree` class and `find` from the `Node` class, located at lines 591 and 112 of `arbol.h`, respectively).  
 
-Añadir alien, selección libre y eliminar ADN peligroso involucran al SplayTree, se puede hacer dichas operaciones y luego pedir la lista de aliens o usar el printTree.
+It is also used in `registrarAlien` at line 187 of `menu.h` (which calls `anadirAlien` in `omnitrix.h` at line 86 and `anadirSplay` at line 26; the latter uses `add` from the `Node` and `SplayTree` classes, declared in `arbol.h` at lines 67 and 542, respectively).  
 
-El guardado se puede probar haciendo modificaciones al añadir aliens y/o eliminarlos, cerrar el programa y luego volver a abrirlo y pedir ver la lista de aliens.
+Finally, it is used in `eliminarADN` in `menu.h` at line 295 (which calls `eliminarAlienSplay` declared at line 29 of `omnitrix.h`, which in turn uses `remove` from the `Node` and `SplayTree` classes, declared in `arbol.h` at lines 189 and 554, respectively).
 
-### Hace un análisis de complejidad correcto y completo para todo el programa y sus componentes,
+---
 
-#### Queue,  Splay Tree y Hash de aliens
+## SICT0301B: Component Evaluation
 
-función de selección guiada (queue): Ya que están ordenados siempre será O(1) para obtener el siguiente alien ya que sólo estoy accediendo a la primera posición y eliminándola, abajo se habla acerca del ordenamkiento, pero si los quisieramos juntar entonces sería O  (n(log(n))) cuando hay más de 20 aliens y O (n^2), aunque según algunas fuentes, cuando hay muy pocos elementos es muy común que el insertionSort sea tan bueno o en ocasiones hasta mejor que el mergeSort, así que la complejidad podría quedar simplemente como O (n(log(n)))
+### Presents correct and complete test cases for all functions and procedures of the program
 
-función de mostrar alien por nombre (Hash) Esta funcion es donde realmente brilla el hash, pues al no tener que actualizar ningún dato, no hace falta utilizar también el SplayTree o el vector.
+The test cases I recommend are as follows:
 
-funcion de selección libre (find SplayTree y Hash): Hash tiene O(1) en muy buenos casos pero en total es O(log(n)) ya que también se hace una especie de búsqueda binaria con el splayTree.
+- Add and remove aliens, then display the alien list to verify that all added aliens are present and in the correct insertion order; afterward, close and reopen the program to test data persistence.
+- Test different sorting scenarios by sorting the default 20 aliens and then adding another alien provided by the user, in order to test both Insertion Sort and Merge Sort.
+- Adding an alien, free selection, and deleting dangerous DNA involve the Splay Tree; these operations can be performed and followed by requesting the alien list or using `printTree`.
+- Data persistence can be tested by modifying aliens (adding and/or deleting), closing the program, reopening it, and then displaying the alien list.
 
-función de añadir alien (insert SplayTree/ vector/Hash): También es O(log(n)) ya que técnicamente es como un find pero que añade al nuevo alien en la posición que debería estar y hasta atrás en el vector, aunque Hash lo haga con O(1), de nuevo las demás estructuras lo atrasan.
+---
 
-función de eliminar alien (delete SplayTree / vector): Si sólo fuera un SplayTree entonces  sería O(log(n)) pero como también debe trabajar con el vector, aumenta a O(n) por el peor de los casos de 
-este último ya que va comparando el nombre del alien guardado en cada posición del vector para saber si existe o no.
+### Provides a correct and complete complexity analysis for the entire program and its components
 
-#### ordenamiento de aliens (20 ó menos)
+#### Queue, Splay Tree, and Alien Hash
 
-selección guiada en base a un parámetro / balanceada: O(n^2) debido a que se usa el insertion sort
+- **Guided selection function (queue):**  
+  Since the aliens are already ordered, retrieving the next alien is O(1), as it only accesses and removes the first element. Sorting is discussed separately; however, if combined, the complexity would be O(n log n) when there are more than 20 aliens and O(n²) otherwise. According to some sources, when there are very few elements, Insertion Sort can be as good as or even better than Merge Sort, so the complexity can be considered O(n log n).
 
-selección guiada en base a dos parámetros: También O(n^2) debido a que se usa el insertion sort, sólo que sobre un nuevo vector generado a partir de la suma de dos atributos
+- **Display alien by name (Hash):**  
+  This function is where the hash truly shines, since no data updates are required and neither the Splay Tree nor the vector needs to be used.
 
-#### ordenamiento de aliens (21 ó más)
+- **Free selection function (Splay Tree find + Hash):**  
+  The Hash can achieve O(1) in very favorable cases, but overall the complexity is O(log n) due to the Splay Tree operations.
 
-selección guiada en base a un parámetro / balanceada: Complejidad de O(n(log(n))) sea cual sea el caso
+- **Add alien function (insert Splay Tree / vector / Hash):**  
+  This operation is O(log n), as it behaves similarly to a search that inserts the new alien at its appropriate position and at the end of the vector. Although Hash insertion is O(1), the other structures increase the overall complexity.
 
-selección guiada en base a dos parámetros: O(n(log(n))) también, sólo que se aplica en base a un nuevo vector generado a partir de la suma de dos atributos
+- **Delete alien function (delete Splay Tree / vector):**  
+  If only a Splay Tree were used, the complexity would be O(log n); however, since the vector must also be processed, the worst-case complexity increases to O(n), as the vector is scanned to locate the alien by name.
 
-#### uso de árbol
+---
 
-crear árbol de aliens: En cada ejecución del programa se crea un árbol de aliens en base a las conexiones registradas, 
+#### Alien sorting (20 or fewer)
 
-agregar alien (nodo) a árbol: O(log(n))
+- **Guided selection based on one parameter / balanced:** O(n²), due to the use of Insertion Sort.
+- **Guided selection based on two parameters:** O(n²), since Insertion Sort is applied to a new vector generated from the sum of two attributes.
 
-econtrar alien (nodo) en árbol : O(log(n)), es la base de otras operaciones como agregar o eliminar, por eso tienen una complejidad temporal bastante similar.
+---
 
-eliminar alien (nodo) en árbol: O(log(n))
+#### Alien sorting (21 or more)
 
-## SICT0303B: Implementa acciones científicas 
+- **Guided selection based on one parameter / balanced:** O(n log n) in all cases.
+- **Guided selection based on two parameters:** O(n log n), applied to a new vector generated from the sum of two attributes.
 
-### Implementa mecanismos para consultar información de las estructuras correctos y útiles dentro de un programa.
+---
 
-El programa tiene la opción de mostrar aliens en base a 5 criterios compuestos o a la elección de 2 de los 4, o en base al nombre.
-El programa permite obtener información acerca de todos los aliens o el que se especifique.
+#### Tree usage
 
-### Implementa mecanismos de lectura de archivos correctos y útiles dentro de un programa. Usar de manera
+- **Create alien tree:** A tree is created on each program execution based on the registered connections.
+- **Add alien (node) to tree:** O(log n)
+- **Find alien (node) in tree:** O(log n); this is the basis for other operations such as adding or deleting, which is why they share similar time complexity.
+- **Delete alien (node) from tree:** O(log n)
 
-Los aliens así como su información, se encuentran almacenados en un archivo llamado "ADN.txt", también los nodos y sus conexiones.
-### Implementa mecanismos de escritura de archivos correctos y útiles dentro de un programa. Usar de manera
+---
 
-Los aliens se guardan al final de cada ejecución del programa para no tener que registrarlos todos cada vez que se vayan a usar y si se trata de iniciar el omnitrix 
-sin aliens entonces se insertan los 20 que están por defecto, para poder probar fácilmente el insertionSort y mergeSort.
+## SICT0303B: Implements Scientific Actions
+
+### Implements correct and useful mechanisms to query information from data structures within a program
+
+The program allows displaying aliens based on five composite criteria, based on a selection of two out of four attributes, or by name.  
+It enables retrieving information about all aliens or a specific one.
+
+---
+
+### Implements correct and useful file reading mechanisms within a program
+
+Aliens and their information, along with nodes and their connections, are stored in a file called `ADN.txt`.
+
+---
+
+### Implements correct and useful file writing mechanisms within a program
+
+Aliens are saved at the end of each program execution to avoid re-registering them every time they are needed.  
+If the Omnitrix is initialized with no aliens, the 20 default aliens are inserted to allow easy testing of Insertion Sort and Merge Sort.
+
